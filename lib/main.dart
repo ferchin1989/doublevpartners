@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'core/theme/app_theme.dart';
 import 'data/repositories/mock_location_repository.dart';
+import 'data/repositories/local_storage_repository.dart';
 import 'presentation/viewmodels/user_view_model.dart';
 import 'presentation/viewmodels/address_view_model.dart';
 import 'presentation/screens/user_screen.dart';
@@ -18,8 +19,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => UserViewModel()),
-        ChangeNotifierProvider(create: (_) => AddressViewModel(MockLocationRepository())),
+        Provider(create: (_) => LocalStorageRepository()),
+        ChangeNotifierProvider(create: (ctx) => UserViewModel(ctx.read<LocalStorageRepository>())),
+        ChangeNotifierProvider(create: (ctx) => AddressViewModel(MockLocationRepository(), ctx.read<LocalStorageRepository>())),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -40,6 +42,17 @@ class _HomeShell extends StatefulWidget {
 class _HomeShellState extends State<_HomeShell> {
   int index = 0;
   final pages = const [UserScreen(), AddressScreen(), SummaryScreen()];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<UserViewModel>().loadFromStorage();
+      context.read<AddressViewModel>()
+        ..loadCountries()
+        ..loadFromStorage();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

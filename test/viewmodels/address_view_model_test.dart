@@ -1,11 +1,30 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:doublevpartners/presentation/viewmodels/address_view_model.dart';
 import 'package:doublevpartners/data/repositories/mock_location_repository.dart';
+import 'package:doublevpartners/data/repositories/local_storage_repository.dart';
+import 'package:doublevpartners/domain/entities/user.dart';
+import 'package:doublevpartners/domain/entities/address.dart';
+
+class FakeLocalStorageRepository extends LocalStorageRepository {
+  final List<Address> _addresses = [];
+  FakeLocalStorageRepository(): super(dbFactory: () async => throw UnimplementedError());
+  @override
+  Future<List<Address>> loadAddresses() async => List.unmodifiable(_addresses);
+  @override
+  Future<void> addAddress(Address a) async { _addresses.add(a); }
+  @override
+  Future<void> deleteAddress(Address a) async { _addresses.removeWhere((x) => x.line1==a.line1 && x.municipality.code==a.municipality.code); }
+  // User methods not used here but must exist
+  @override
+  Future<User?> loadUser() async => null;
+  @override
+  Future<void> saveUser(User u) async {}
+}
 
 void main() {
   group('AddressViewModel', () {
     test('loads countries and dependent lists; adds and removes address', () async {
-      final vm = AddressViewModel(MockLocationRepository());
+      final vm = AddressViewModel(MockLocationRepository(), FakeLocalStorageRepository());
 
       expect(vm.countries, isEmpty);
       await vm.loadCountries();
