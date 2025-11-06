@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'core/theme/app_theme.dart';
+import 'core/router/app_router.dart';
 import 'data/repositories/mock_location_repository.dart';
 import 'data/repositories/local_storage_repository.dart';
 import 'data/repositories/hybrid_storage_repository.dart';
@@ -13,10 +14,6 @@ import 'presentation/viewmodels/address_view_model.dart';
 import 'presentation/viewmodels/users_view_model.dart';
 import 'presentation/viewmodels/auth_view_model.dart';
 import 'presentation/viewmodels/connectivity_view_model.dart';
-import 'presentation/screens/user_screen.dart';
-import 'presentation/screens/address_screen.dart';
-import 'presentation/screens/summary_screen.dart';
-import 'presentation/widgets/auth_wrapper.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -85,61 +82,35 @@ class MyApp extends StatelessWidget {
           },
         ),
       ],
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Double V Partners - Prueba',
-        theme: AppTheme.theme,
-        home: const AuthWrapper(child: _HomeShell()),
+      child: Builder(
+        builder: (context) {
+          final authVM = context.watch<AuthViewModel>();
+          final router = AppRouter.createRouter(authVM);
+          
+          // Cargar datos iniciales cuando el usuario se autentica
+          if (authVM.isAuthenticated) {
+            Future.microtask(() {
+              final usersVM = context.read<UsersViewModel?>();
+              final addressVM = context.read<AddressViewModel?>();
+              
+              if (usersVM != null) {
+                usersVM.loadUsers();
+              }
+              if (addressVM != null) {
+                addressVM.loadCountries();
+              }
+            });
+          }
+          
+          return MaterialApp.router(
+            debugShowCheckedModeBanner: false,
+            title: 'Double V Partners - Prueba',
+            theme: AppTheme.theme,
+            routerConfig: router,
+          );
+        },
       ),
     );
   }
 }
 
-class _HomeShell extends StatefulWidget {
-  const _HomeShell();
-  @override
-  State<_HomeShell> createState() => _HomeShellState();
-}
-
-class _HomeShellState extends State<_HomeShell> {
-  int index = 0;
-  final pages = const [UserScreen(), AddressScreen(), SummaryScreen()];
-  bool _initialized = false;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Carga lazy: solo una vez después de que el repositorio esté listo
-    if (!_initialized) {
-      _initialized = true;
-      // Carga en background sin bloquear UI
-      Future.microtask(() {
-        final usersVM = context.read<UsersViewModel?>();
-        final addressVM = context.read<AddressViewModel?>();
-        
-        if (usersVM != null) {
-          usersVM.loadUsers();
-        }
-        if (addressVM != null) {
-          addressVM.loadCountries();
-        }
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: IndexedStack(index: index, children: pages),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: index,
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.person_outline), label: 'Usuario'),
-          NavigationDestination(icon: Icon(Icons.location_on_outlined), label: 'Direcciones'),
-          NavigationDestination(icon: Icon(Icons.list_alt_outlined), label: 'Resumen'),
-        ],
-        onDestinationSelected: (i) => setState(() => index = i),
-      ),
-    );
-  }
-}

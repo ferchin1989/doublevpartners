@@ -37,11 +37,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
             _passwordController.text,
           );
       
-      // Registro exitoso - cerrar la pantalla de registro
-      if (mounted) {
-        Navigator.of(context).pop();
-        // El AuthWrapper detectará el cambio y mostrará la app
-      }
+      // Registro exitoso - go_router redirigirá automáticamente
+      // No necesitamos hacer nada, el redirect en app_router.dart se encarga
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
