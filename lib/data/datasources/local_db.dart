@@ -10,11 +10,11 @@ class LocalDb {
     final path = p.join(dbPath, 'doublevpartners.db');
     _db = await openDatabase(
       path,
-      version: 2,
+      version: 3,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE user (
-            id INTEGER PRIMARY KEY CHECK (id = 1),
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
             first_name TEXT NOT NULL,
             last_name TEXT NOT NULL,
             birth_date TEXT
@@ -40,6 +40,21 @@ class LocalDb {
           // Add user_id with default 1 to existing rows
           await db.execute('ALTER TABLE addresses ADD COLUMN user_id INTEGER NOT NULL DEFAULT 1;');
           await db.execute('CREATE INDEX IF NOT EXISTS idx_addresses_user ON addresses(user_id);');
+        }
+        if (oldVersion < 3) {
+          // Recreate user table with AUTOINCREMENT id, migrating existing single row (assumed id=1)
+          await db.execute('''
+            CREATE TABLE user_new (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              first_name TEXT NOT NULL,
+              last_name TEXT NOT NULL,
+              birth_date TEXT
+            );
+          ''');
+          // Try copy existing single user
+          await db.execute('INSERT INTO user_new (id, first_name, last_name, birth_date) SELECT 1, first_name, last_name, birth_date FROM user');
+          await db.execute('DROP TABLE IF EXISTS user');
+          await db.execute('ALTER TABLE user_new RENAME TO user');
         }
       },
     );

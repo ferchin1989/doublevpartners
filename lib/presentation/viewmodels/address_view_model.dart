@@ -50,7 +50,7 @@ class AddressViewModel extends ChangeNotifier {
   void onMunicipalityChanged(Municipality? m) { selectedMunicipality = m; notifyListeners(); }
   void onLine1Changed(String v) { line1 = v; notifyListeners(); }
 
-  void addAddress() {
+  Future<void> addAddressForUser(int userId) async {
     if (selectedCountry != null && selectedDepartment != null && selectedMunicipality != null && line1.isNotEmpty) {
       final a = Address(
         country: selectedCountry!,
@@ -58,11 +58,19 @@ class AddressViewModel extends ChangeNotifier {
         municipality: selectedMunicipality!,
         line1: line1,
       );
+      await storage.addAddressForUser(userId, a);
       _addresses.add(a);
-      storage.addAddress(a);
       line1 = '';
       notifyListeners();
     }
+  }
+
+  Future<void> loadAddressesForUser(int userId) async {
+    final loaded = await storage.loadAddressesByUser(userId);
+    _addresses
+      ..clear()
+      ..addAll(loaded);
+    notifyListeners();
   }
 
   void removeAt(int index) {

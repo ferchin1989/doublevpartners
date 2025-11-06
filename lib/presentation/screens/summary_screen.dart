@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../viewmodels/user_view_model.dart';
-import '../viewmodels/address_view_model.dart';
+import '../viewmodels/users_view_model.dart';
 import '../widgets/futuristic_scaffold.dart';
 import '../../domain/repositories/local_storage_repository.dart' as domain;
+import '../../domain/entities/user.dart' as domain;
+import '../../domain/entities/address.dart' as domain;
 
 class SummaryScreen extends StatelessWidget {
   const SummaryScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final user = context.watch<UserViewModel>().user;
-    final addresses = context.watch<AddressViewModel>().addresses;
+    final usersVM = context.watch<UsersViewModel>();
+    final storage = context.read<domain.LocalStorageRepository>();
 
     return FuturisticScaffold(
       title: 'Resumen',
@@ -33,99 +34,143 @@ class SummaryScreen extends StatelessWidget {
               ),
             );
             if (confirm == true) {
-              await context.read<domain.LocalStorageRepository>().clearAll();
-              // Reset estado en memoria
-              context.read<UserViewModel>().reset();
-              await context.read<AddressViewModel>().loadFromStorage();
+              await storage.clearAll();
+              usersVM.reset();
             }
           },
         ),
       ],
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  const CircleAvatar(child: Icon(Icons.person)),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('${user.firstName} ${user.lastName}', style: Theme.of(context).textTheme.titleMedium),
-                        const SizedBox(height: 4),
-                        Text('Nacimiento: ${user.birthDate?.toLocal().toString().split(' ').first ?? '—'}'),
-                      ],
-                    ),
-                  ),
-                  IconButton(
-                    tooltip: 'Editar usuario',
-                    icon: const Icon(Icons.edit_outlined),
-                    onPressed: () async {
-                      await _showEditUserDialog(context);
-                    },
-                  )
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text('Direcciones', style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 8),
-          if (addresses.isEmpty)
-            const Text('Sin direcciones aún')
-          else
-            Expanded(
-              child: ListView.separated(
-                itemCount: addresses.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 8),
-                itemBuilder: (context, index) {
-                  final a = addresses[index];
-                  return Card(
-                    child: ExpansionTile(
-                      title: Text(a.line1),
-                      subtitle: Text('${a.country.name} • ${a.department.name} • ${a.municipality.name}'),
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                          child: Row(
-                            children: [
-                              FilledButton.icon(
-                                icon: const Icon(Icons.edit_outlined),
-                                label: const Text('Editar'),
-                                onPressed: () async {
-                                  await _showEditAddressDialog(context, index, a.line1);
-                                },
-                              ),
-                              const SizedBox(width: 8),
-                              OutlinedButton.icon(
-                                icon: const Icon(Icons.delete_outline),
-                                label: const Text('Eliminar'),
-                                onPressed: () => context.read<AddressViewModel>().removeAt(index),
-                              ),
-                            ],
-                          ),
-                        )
-                      ],
-                    ),
-                  );
-                },
-              ),
+      body: usersVM.users.isEmpty
+          ? const Center(
+              child: Text('No hay usuarios creados', style: TextStyle(fontSize: 18)),
             )
-        ],
-      ),
+          : ListView.separated(
+              itemCount: usersVM.users.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              itemBuilder: (context, index) {
+                final user = usersVM.users[index];
+                return _UserCard(user: user, storage: storage, usersVM: usersVM);
+              },
+            ),
     );
   }
 }
 
-Future<void> _showEditUserDialog(BuildContext context) async {
-  final vm = context.read<UserViewModel>();
-  final firstCtrl = TextEditingController(text: vm.user.firstName);
-  final lastCtrl = TextEditingController(text: vm.user.lastName);
-  DateTime? birth = vm.user.birthDate;
+class _UserCard extends StatefulWidget {
+  final domain.User user;
+  final domain.LocalStorageRepository storage;
+  final UsersViewModel usersVM;
+
+  const _UserCard({required this.user, required this.storage, required this.usersVM});
+
+  @override
+  State<_UserCard> createState() => _UserCardState();
+}
+
+class _UserCardState extends State<_UserCard> {
+  List<domain.Address>? _addresses;
+
+  Future<void> _loadAddresses() async {
+    if (_addresses == null && widget.user.id != null) {
+      final addrs = await widget.storage.loadAddressesByUser(widget.user.id!);
+      if (mounted) {
+        setState(() => _addresses = addrs);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Column(
+        children: [
+          ListTile(
+            leading: const CircleAvatar(child: Icon(Icons.person)),
+            title: Text('${widget.user.firstName} ${widget.user.lastName}'),
+            subtitle: Text('Nacimiento: ${widget.user.birthDate?.toLocal().toString().split(' ').first ?? '—'}'),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  tooltip: 'Editar usuario',
+                  icon: const Icon(Icons.edit_outlined),
+                  onPressed: () => _showEditUserDialog(context),
+                ),
+                IconButton(
+                  tooltip: 'Eliminar usuario',
+                  icon: const Icon(Icons.delete_outline),
+                  onPressed: () async {
+                    final confirm = await showDialog<bool>(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        backgroundColor: const Color(0xFF1B2233),
+                        title: const Text('Eliminar usuario', style: TextStyle(color: Colors.white)),
+                        content: const Text('¿Eliminar este usuario y todas sus direcciones?'),
+                        actions: [
+                          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+                          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Eliminar')),
+                        ],
+                      ),
+                    );
+                    if (confirm == true && widget.user.id != null) {
+                      await widget.usersVM.deleteUser(widget.user.id!);
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
+          ExpansionTile(
+            title: const Text('Direcciones disponibles'),
+            onExpansionChanged: (expanded) {
+              if (expanded) _loadAddresses();
+            },
+            children: [
+              if (_addresses == null)
+                const Padding(
+                  padding: EdgeInsets.all(16),
+                  child: CircularProgressIndicator(),
+                )
+              else if (_addresses!.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Text('Este usuario no tiene direcciones'),
+                )
+              else
+                ..._addresses!.map((addr) => ListTile(
+                      title: Text(addr.line1),
+                      subtitle: Text('${addr.country.name} • ${addr.department.name} • ${addr.municipality.name}'),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.edit_outlined),
+                            onPressed: () => _showEditAddressDialog(context, addr),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete_outline),
+                            onPressed: () async {
+                              if (widget.user.id != null) {
+                                await widget.storage.deleteAddressForUser(widget.user.id!, addr);
+                                _addresses!.remove(addr);
+                                setState(() {});
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                    )),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showEditUserDialog(BuildContext context) async {
+  final firstCtrl = TextEditingController(text: widget.user.firstName);
+  final lastCtrl = TextEditingController(text: widget.user.lastName);
+  DateTime? birth = widget.user.birthDate;
   await showDialog(
     context: context,
     builder: (ctx) => AlertDialog(
@@ -171,9 +216,14 @@ Future<void> _showEditUserDialog(BuildContext context) async {
         TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
         FilledButton(
           onPressed: () async {
-            await vm.updateFirstName(firstCtrl.text.trim());
-            await vm.updateLastName(lastCtrl.text.trim());
-            await vm.updateBirthDate(birth);
+            if (widget.user.id != null) {
+              final updated = widget.user.copyWith(
+                firstName: firstCtrl.text.trim(),
+                lastName: lastCtrl.text.trim(),
+                birthDate: birth,
+              );
+              await widget.usersVM.updateUser(updated);
+            }
             // ignore: use_build_context_synchronously
             Navigator.pop(ctx);
           },
@@ -182,11 +232,10 @@ Future<void> _showEditUserDialog(BuildContext context) async {
       ],
     ),
   );
-}
+  }
 
-Future<void> _showEditAddressDialog(BuildContext context, int index, String currentLine) async {
-  final vm = context.read<AddressViewModel>();
-  final ctrl = TextEditingController(text: currentLine);
+  Future<void> _showEditAddressDialog(BuildContext context, domain.Address addr) async {
+  final ctrl = TextEditingController(text: addr.line1);
   await showDialog(
     context: context,
     builder: (ctx) => AlertDialog(
@@ -201,7 +250,19 @@ Future<void> _showEditAddressDialog(BuildContext context, int index, String curr
         TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
         FilledButton(
           onPressed: () async {
-            await vm.updateLineAt(index, ctrl.text);
+            if (widget.user.id != null) {
+              await widget.storage.updateAddressLineForUser(widget.user.id!, addr, ctrl.text.trim());
+              final idx = _addresses!.indexOf(addr);
+              if (idx != -1) {
+                _addresses![idx] = domain.Address(
+                  country: addr.country,
+                  department: addr.department,
+                  municipality: addr.municipality,
+                  line1: ctrl.text.trim(),
+                );
+                setState(() {});
+              }
+            }
             // ignore: use_build_context_synchronously
             Navigator.pop(ctx);
           },
@@ -210,4 +271,5 @@ Future<void> _showEditAddressDialog(BuildContext context, int index, String curr
       ],
     ),
   );
+  }
 }

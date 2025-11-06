@@ -21,6 +21,22 @@ class FakeLocalStorageRepository implements domain.LocalStorageRepository {
   Future<void> updateAddressLine(Address oldAddress, String newLine1) async {}
   @override
   Future<void> clearAll() async { _user = null; }
+  @override
+  Future<List<User>> listUsers() async => _user != null ? [_user!] : [];
+  @override
+  Future<User> createUser(User u) async { _user = u.copyWith(id: 1); return _user!; }
+  @override
+  Future<void> updateUser(User u) async { _user = u; }
+  @override
+  Future<void> deleteUser(int id) async { _user = null; }
+  @override
+  Future<List<Address>> loadAddressesByUser(int userId) async => [];
+  @override
+  Future<void> addAddressForUser(int userId, Address a) async {}
+  @override
+  Future<void> deleteAddressForUser(int userId, Address a) async {}
+  @override
+  Future<void> updateAddressLineForUser(int userId, Address oldAddress, String newLine1) async {}
 }
 
 void main() {

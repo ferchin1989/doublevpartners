@@ -6,6 +6,7 @@ import 'data/repositories/local_storage_repository.dart';
 import 'domain/repositories/local_storage_repository.dart' as domain;
 import 'presentation/viewmodels/user_view_model.dart';
 import 'presentation/viewmodels/address_view_model.dart';
+import 'presentation/viewmodels/users_view_model.dart';
 import 'presentation/screens/user_screen.dart';
 import 'presentation/screens/address_screen.dart';
 import 'presentation/screens/summary_screen.dart';
@@ -21,6 +22,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         Provider<domain.LocalStorageRepository>(create: (_) => SqfliteLocalStorageRepository()),
+        ChangeNotifierProvider(create: (ctx) => UsersViewModel(ctx.read<domain.LocalStorageRepository>())),
         ChangeNotifierProvider(create: (ctx) => UserViewModel(ctx.read<domain.LocalStorageRepository>())),
         ChangeNotifierProvider(create: (ctx) => AddressViewModel(MockLocationRepository(), ctx.read<domain.LocalStorageRepository>())),
       ],
@@ -48,6 +50,7 @@ class _HomeShellState extends State<_HomeShell> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<UsersViewModel>().loadUsers();
       context.read<UserViewModel>().loadFromStorage();
       context.read<AddressViewModel>()
         ..loadCountries()

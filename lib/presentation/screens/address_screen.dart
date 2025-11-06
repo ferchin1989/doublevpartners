@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../domain/entities/location.dart';
 import '../viewmodels/address_view_model.dart';
-import '../viewmodels/user_view_model.dart';
+import '../viewmodels/users_view_model.dart';
 import '../widgets/futuristic_scaffold.dart';
 
 class AddressScreen extends StatefulWidget {
@@ -21,16 +21,43 @@ class _AddressScreenState extends State<AddressScreen> {
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<AddressViewModel>();
-    final userName = context.watch<UserViewModel>().user;
+    final activeUser = context.watch<UsersViewModel>().activeUser;
+    
     return FuturisticScaffold(
       title: 'Direcciones',
-      body: Column(
+      body: activeUser == null
+          ? Center(
+              child: Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.person_off, size: 64, color: Colors.white70),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Debes crear primero un usuario',
+                        style: Theme.of(context).textTheme.titleLarge,
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Ve a la pestaña Usuario para crear uno',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white70),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            )
+          : Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
             padding: const EdgeInsets.only(bottom: 8.0),
             child: Text(
-              'Usuario: ${userName.firstName} ${userName.lastName}'.trim(),
+              'Usuario: ${activeUser.firstName} ${activeUser.lastName}',
               style: Theme.of(context).textTheme.titleMedium,
             ),
           ),
@@ -82,7 +109,7 @@ class _AddressScreenState extends State<AddressScreen> {
                     alignment: Alignment.centerRight,
                     child: FilledButton.icon(
                       onPressed: vm.selectedCountry != null && vm.selectedDepartment != null && vm.selectedMunicipality != null && vm.line1.isNotEmpty
-                          ? vm.addAddress
+                          ? () => vm.addAddressForUser(activeUser.id!)
                           : null,
                       icon: const Icon(Icons.add_location_alt_outlined),
                       label: const Text('Agregar dirección'),

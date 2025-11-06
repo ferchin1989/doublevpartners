@@ -32,6 +32,32 @@ class FakeLocalStorageRepository implements domain.LocalStorageRepository {
   }
   @override
   Future<void> clearAll() async { _addresses.clear(); }
+  @override
+  Future<List<User>> listUsers() async => [];
+  @override
+  Future<User> createUser(User u) async => u.copyWith(id: 1);
+  @override
+  Future<void> updateUser(User u) async {}
+  @override
+  Future<void> deleteUser(int id) async {}
+  @override
+  Future<List<Address>> loadAddressesByUser(int userId) async => List.unmodifiable(_addresses);
+  @override
+  Future<void> addAddressForUser(int userId, Address a) async { _addresses.add(a); }
+  @override
+  Future<void> deleteAddressForUser(int userId, Address a) async { _addresses.removeWhere((x) => x.line1==a.line1 && x.municipality.code==a.municipality.code); }
+  @override
+  Future<void> updateAddressLineForUser(int userId, Address oldAddress, String newLine1) async {
+    final idx = _addresses.indexWhere((x) => x.line1==oldAddress.line1 && x.municipality.code==oldAddress.municipality.code);
+    if (idx != -1) {
+      _addresses[idx] = Address(
+        country: oldAddress.country,
+        department: oldAddress.department,
+        municipality: oldAddress.municipality,
+        line1: newLine1,
+      );
+    }
+  }
 }
 
 void main() {
@@ -57,7 +83,7 @@ void main() {
       vm.onLine1Changed('Calle 123 #45-67');
 
       // Add address
-      vm.addAddress();
+      await vm.addAddressForUser(1);
       expect(vm.addresses.length, 1);
 
       // Remove address
