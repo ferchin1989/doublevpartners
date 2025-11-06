@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../domain/entities/location.dart';
 import '../viewmodels/address_view_model.dart';
+import '../viewmodels/user_view_model.dart';
 import '../widgets/futuristic_scaffold.dart';
 
 class AddressScreen extends StatefulWidget {
@@ -20,11 +21,19 @@ class _AddressScreenState extends State<AddressScreen> {
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<AddressViewModel>();
+    final userName = context.watch<UserViewModel>().user;
     return FuturisticScaffold(
       title: 'Direcciones',
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Text(
+              'Usuario: ${userName.firstName} ${userName.lastName}'.trim(),
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+          ),
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),

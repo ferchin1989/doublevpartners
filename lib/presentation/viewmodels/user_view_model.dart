@@ -31,4 +31,9 @@ class UserViewModel extends ChangeNotifier {
     _user = _user.copyWith(birthDate: d); notifyListeners();
     await _storage.saveUser(_user);
   }
+
+  void reset() {
+    _user = User.empty;
+    notifyListeners();
+  }
 }

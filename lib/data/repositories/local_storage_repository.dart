@@ -8,6 +8,8 @@ import 'local_storage/user_save.dart' as user_save;
 import 'local_storage/addresses_load.dart' as addresses_load;
 import 'local_storage/address_add.dart' as address_add;
 import 'local_storage/address_delete.dart' as address_delete;
+import 'local_storage/address_update.dart' as address_update;
+import 'local_storage/clear_all.dart' as clear_all;
 
 class SqfliteLocalStorageRepository implements domain.LocalStorageRepository {
   final Future<Database> Function() _dbFactory;
@@ -42,5 +44,17 @@ class SqfliteLocalStorageRepository implements domain.LocalStorageRepository {
   Future<void> deleteAddress(Address a) async {
     final db = await _dbFactory();
     await address_delete.deleteAddress(db, a);
+  }
+
+  @override
+  Future<void> updateAddressLine(Address oldAddress, String newLine1) async {
+    final db = await _dbFactory();
+    await address_update.updateAddressLine(db, oldAddress, newLine1);
+  }
+
+  @override
+  Future<void> clearAll() async {
+    final db = await _dbFactory();
+    await clear_all.clearAll(db);
   }
 }

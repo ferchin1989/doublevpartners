@@ -3,6 +3,7 @@ import '../../../domain/entities/address.dart';
 
 Future<void> addAddress(Database db, Address a) async {
   await db.insert('addresses', {
+    'user_id': 1, // relate to current user (single-user profile)
     'country_code': a.country.code,
     'country_name': a.country.name,
     'department_code': a.department.code,

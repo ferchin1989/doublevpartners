@@ -8,4 +8,6 @@ abstract class LocalStorageRepository {
   Future<List<Address>> loadAddresses();
   Future<void> addAddress(Address a);
   Future<void> deleteAddress(Address a);
+  Future<void> updateAddressLine(Address oldAddress, String newLine1);
+  Future<void> clearAll();
 }

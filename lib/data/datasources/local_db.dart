@@ -10,7 +10,7 @@ class LocalDb {
     final path = p.join(dbPath, 'doublevpartners.db');
     _db = await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE user (
@@ -23,6 +23,7 @@ class LocalDb {
         await db.execute('''
           CREATE TABLE addresses (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
             country_code TEXT NOT NULL,
             country_name TEXT NOT NULL,
             department_code TEXT NOT NULL,
@@ -32,6 +33,14 @@ class LocalDb {
             line1 TEXT NOT NULL
           );
         ''');
+        await db.execute('CREATE INDEX IF NOT EXISTS idx_addresses_user ON addresses(user_id);');
+      },
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 2) {
+          // Add user_id with default 1 to existing rows
+          await db.execute('ALTER TABLE addresses ADD COLUMN user_id INTEGER NOT NULL DEFAULT 1;');
+          await db.execute('CREATE INDEX IF NOT EXISTS idx_addresses_user ON addresses(user_id);');
+        }
       },
     );
     return _db!;

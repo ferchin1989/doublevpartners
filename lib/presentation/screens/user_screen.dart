@@ -29,6 +29,7 @@ class _UserScreenState extends State<UserScreen> {
                 child: Column(
                   children: [
                     TextFormField(
+                      style: const TextStyle(color: Colors.white),
                       initialValue: vm.user.firstName,
                       decoration: const InputDecoration(labelText: 'Nombre'),
                       onChanged: vm.updateFirstName,
@@ -36,6 +37,7 @@ class _UserScreenState extends State<UserScreen> {
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
+                      style: const TextStyle(color: Colors.white),
                       initialValue: vm.user.lastName,
                       decoration: const InputDecoration(labelText: 'Apellido'),
                       onChanged: vm.updateLastName,

@@ -3,7 +3,8 @@ import '../../../domain/entities/address.dart';
 import '../../../domain/entities/location.dart';
 
 Future<List<Address>> loadAddresses(Database db) async {
-  final rows = await db.query('addresses', orderBy: 'id ASC');
+  // For this app we have a single-user profile with id = 1
+  final rows = await db.query('addresses', where: 'user_id = ?', whereArgs: [1], orderBy: 'id ASC');
   return rows.map((r) {
     final country = Country(r['country_code'] as String, r['country_name'] as String);
     final department = Department(

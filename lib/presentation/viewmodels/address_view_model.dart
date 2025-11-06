@@ -72,4 +72,18 @@ class AddressViewModel extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<void> updateLineAt(int index, String newLine) async {
+    if (index>=0 && index<_addresses.length && newLine.trim().isNotEmpty) {
+      final old = _addresses[index];
+      await storage.updateAddressLine(old, newLine.trim());
+      _addresses[index] = Address(
+        country: old.country,
+        department: old.department,
+        municipality: old.municipality,
+        line1: newLine.trim(),
+      );
+      notifyListeners();
+    }
+  }
 }
