@@ -20,9 +20,26 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        Provider<domain.LocalStorageRepository>(create: (_) => SqfliteLocalStorageRepository()),
-        ChangeNotifierProvider(create: (ctx) => UsersViewModel(ctx.read<domain.LocalStorageRepository>())),
-        ChangeNotifierProvider(create: (ctx) => AddressViewModel(MockLocationRepository(), ctx.read<domain.LocalStorageRepository>())),
+        // Repositories (no cambian)
+        Provider<domain.LocalStorageRepository>(
+          create: (_) => SqfliteLocalStorageRepository(),
+          dispose: (_, __) {}, // SQLite se cierra automáticamente
+        ),
+        Provider<MockLocationRepository>(
+          create: (_) => MockLocationRepository(),
+        ),
+        
+        // ViewModels (notifican cambios)
+        ChangeNotifierProvider(
+          create: (ctx) => UsersViewModel(ctx.read<domain.LocalStorageRepository>())
+            ..loadUsers(), // Carga inicial
+        ),
+        ChangeNotifierProvider(
+          create: (ctx) => AddressViewModel(
+            ctx.read<MockLocationRepository>(),
+            ctx.read<domain.LocalStorageRepository>(),
+          )..loadCountries(), // Carga inicial
+        ),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -44,14 +61,7 @@ class _HomeShellState extends State<_HomeShell> {
   int index = 0;
   final pages = const [UserScreen(), AddressScreen(), SummaryScreen()];
 
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<UsersViewModel>().loadUsers();
-      context.read<AddressViewModel>().loadCountries();
-    });
-  }
+  // initState removido - la carga inicial se hace en los providers
 
   @override
   Widget build(BuildContext context) {

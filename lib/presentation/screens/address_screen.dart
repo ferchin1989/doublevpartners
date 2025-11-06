@@ -12,16 +12,20 @@ class AddressScreen extends StatefulWidget {
 }
 
 class _AddressScreenState extends State<AddressScreen> {
-  @override
-  void initState() {
-    super.initState();
-    Future.microtask(() => context.read<AddressViewModel>().loadCountries());
-  }
+  int? _lastActiveUserId;
 
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<AddressViewModel>();
     final activeUser = context.watch<UsersViewModel>().activeUser;
+    
+    // Auto-load addresses when active user changes
+    if (activeUser?.id != _lastActiveUserId && activeUser?.id != null) {
+      _lastActiveUserId = activeUser!.id;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        vm.loadAddressesForUser(activeUser.id!);
+      });
+    }
     
     return FuturisticScaffold(
       title: 'Direcciones',
