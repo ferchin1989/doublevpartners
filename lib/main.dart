@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'core/theme/app_theme.dart';
 import 'data/repositories/mock_location_repository.dart';
 import 'data/repositories/local_storage_repository.dart';
+import 'domain/repositories/local_storage_repository.dart' as domain;
 import 'presentation/viewmodels/user_view_model.dart';
 import 'presentation/viewmodels/address_view_model.dart';
 import 'presentation/screens/user_screen.dart';
@@ -19,9 +20,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        Provider(create: (_) => LocalStorageRepository()),
-        ChangeNotifierProvider(create: (ctx) => UserViewModel(ctx.read<LocalStorageRepository>())),
-        ChangeNotifierProvider(create: (ctx) => AddressViewModel(MockLocationRepository(), ctx.read<LocalStorageRepository>())),
+        Provider<domain.LocalStorageRepository>(create: (_) => SqfliteLocalStorageRepository()),
+        ChangeNotifierProvider(create: (ctx) => UserViewModel(ctx.read<domain.LocalStorageRepository>())),
+        ChangeNotifierProvider(create: (ctx) => AddressViewModel(MockLocationRepository(), ctx.read<domain.LocalStorageRepository>())),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

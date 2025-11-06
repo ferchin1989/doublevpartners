@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import '../../domain/entities/user.dart';
-import '../../data/repositories/local_storage_repository.dart';
+import '../../domain/repositories/local_storage_repository.dart';
 
 class UserViewModel extends ChangeNotifier {
   final LocalStorageRepository _storage;

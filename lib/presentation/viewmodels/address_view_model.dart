@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import '../../domain/entities/address.dart';
 import '../../domain/entities/location.dart';
 import '../../domain/repositories/location_repository.dart';
-import '../../data/repositories/local_storage_repository.dart';
+import '../../domain/repositories/local_storage_repository.dart';
 
 class AddressViewModel extends ChangeNotifier {
   final LocationRepository repo;

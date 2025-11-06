@@ -1,13 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:doublevpartners/presentation/viewmodels/address_view_model.dart';
 import 'package:doublevpartners/data/repositories/mock_location_repository.dart';
-import 'package:doublevpartners/data/repositories/local_storage_repository.dart';
+import 'package:doublevpartners/domain/repositories/local_storage_repository.dart' as domain;
 import 'package:doublevpartners/domain/entities/user.dart';
 import 'package:doublevpartners/domain/entities/address.dart';
 
-class FakeLocalStorageRepository extends LocalStorageRepository {
+class FakeLocalStorageRepository implements domain.LocalStorageRepository {
   final List<Address> _addresses = [];
-  FakeLocalStorageRepository(): super(dbFactory: () async => throw UnimplementedError());
   @override
   Future<List<Address>> loadAddresses() async => List.unmodifiable(_addresses);
   @override

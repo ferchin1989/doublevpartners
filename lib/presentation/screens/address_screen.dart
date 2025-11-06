@@ -33,31 +33,38 @@ class _AddressScreenState extends State<AddressScreen> {
                   DropdownButtonFormField<Country>(
                     value: vm.selectedCountry,
                     items: vm.countries
-                        .map((c) => DropdownMenuItem(value: c, child: Text(c.name)))
+                        .map((c) => DropdownMenuItem(value: c, child: Text(c.name, style: const TextStyle(color: Colors.white))))
                         .toList(),
                     onChanged: (c) => vm.onCountryChanged(c),
+                    dropdownColor: const Color(0xFF1B2233),
+                    style: const TextStyle(color: Colors.white),
                     decoration: const InputDecoration(labelText: 'País'),
                   ),
                   const SizedBox(height: 12),
                   DropdownButtonFormField<Department>(
                     value: vm.selectedDepartment,
                     items: vm.departments
-                        .map((d) => DropdownMenuItem(value: d, child: Text(d.name)))
+                        .map((d) => DropdownMenuItem(value: d, child: Text(d.name, style: const TextStyle(color: Colors.white))))
                         .toList(),
                     onChanged: (d) => vm.onDepartmentChanged(d),
+                    dropdownColor: const Color(0xFF1B2233),
+                    style: const TextStyle(color: Colors.white),
                     decoration: const InputDecoration(labelText: 'Departamento'),
                   ),
                   const SizedBox(height: 12),
                   DropdownButtonFormField<Municipality>(
                     value: vm.selectedMunicipality,
                     items: vm.municipalities
-                        .map((m) => DropdownMenuItem(value: m, child: Text(m.name)))
+                        .map((m) => DropdownMenuItem(value: m, child: Text(m.name, style: const TextStyle(color: Colors.white))))
                         .toList(),
                     onChanged: (m) => vm.onMunicipalityChanged(m),
+                    dropdownColor: const Color(0xFF1B2233),
+                    style: const TextStyle(color: Colors.white),
                     decoration: const InputDecoration(labelText: 'Municipio'),
                   ),
                   const SizedBox(height: 12),
                   TextFormField(
+                    style: const TextStyle(color: Colors.white),
                     decoration: const InputDecoration(labelText: 'Dirección física'),
                     onChanged: vm.onLine1Changed,
                   ),

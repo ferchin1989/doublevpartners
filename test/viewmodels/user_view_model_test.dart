@@ -1,15 +1,22 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:doublevpartners/presentation/viewmodels/user_view_model.dart';
-import 'package:doublevpartners/data/repositories/local_storage_repository.dart';
+import 'package:doublevpartners/domain/repositories/local_storage_repository.dart' as domain;
 import 'package:doublevpartners/domain/entities/user.dart';
+import 'package:doublevpartners/domain/entities/address.dart';
 
-class FakeLocalStorageRepository extends LocalStorageRepository {
+class FakeLocalStorageRepository implements domain.LocalStorageRepository {
   User? _user;
-  FakeLocalStorageRepository(): super(dbFactory: () async => throw UnimplementedError());
   @override
   Future<User?> loadUser() async => _user;
   @override
   Future<void> saveUser(User u) async { _user = u; }
+  // Unused in these tests
+  @override
+  Future<void> addAddress(Address a) async {}
+  @override
+  Future<void> deleteAddress(Address a) async {}
+  @override
+  Future<List<Address>> loadAddresses() async => [];
 }
 
 void main() {
