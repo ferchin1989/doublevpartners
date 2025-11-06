@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "705832394342",
+    "project_id": "pruebasemisenior",
+    "storage_bucket": "pruebasemisenior.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:705832394342:android:cc42e41320bf9fd12197a7",
+        "android_client_info": {
+          "package_name": "com.example.doublevpartners"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD0s66Rtnku0Zw3C_jxOKBlwM0hugL1yUQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

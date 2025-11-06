@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'connectivity_banner.dart';
 
 class FuturisticScaffold extends StatelessWidget {
   final Widget body;
@@ -33,14 +34,21 @@ class FuturisticScaffold extends StatelessWidget {
               child: const SizedBox.shrink(),
             ),
           ),
-          Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 640),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: body,
+          Column(
+            children: [
+              const ConnectivityBanner(),
+              Expanded(
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 640),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: body,
+                    ),
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
         ],
       ),

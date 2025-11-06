@@ -51,8 +51,12 @@ class LocalDb {
               birth_date TEXT
             );
           ''');
-          // Try copy existing single user
-          await db.execute('INSERT INTO user_new (id, first_name, last_name, birth_date) SELECT 1, first_name, last_name, birth_date FROM user');
+          // Try copy existing single user (ignore if fails - no data to migrate)
+          try {
+            await db.execute('INSERT INTO user_new (id, first_name, last_name, birth_date) SELECT 1, first_name, last_name, birth_date FROM user WHERE id = 1');
+          } catch (_) {
+            // No existing user to migrate - that's OK
+          }
           await db.execute('DROP TABLE IF EXISTS user');
           await db.execute('ALTER TABLE user_new RENAME TO user');
         }

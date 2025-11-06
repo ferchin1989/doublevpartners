@@ -23,19 +23,19 @@ class MockLocationRepository implements LocationRepository {
 
   @override
   Future<List<Country>> getCountries() async {
-    await Future.delayed(const Duration(milliseconds: 200));
+    // Sin delay artificial - datos mock son instantáneos
     return _countries;
-    }
+  }
 
   @override
   Future<List<Department>> getDepartments(String countryCode) async {
-    await Future.delayed(const Duration(milliseconds: 200));
+    // Sin delay artificial - datos mock son instantáneos
     return _departments.where((d) => d.countryCode == countryCode).toList();
   }
 
   @override
   Future<List<Municipality>> getMunicipalities(String departmentCode) async {
-    await Future.delayed(const Duration(milliseconds: 200));
+    // Sin delay artificial - datos mock son instantáneos
     return _municipalities.where((m) => m.departmentCode == departmentCode).toList();
   }
 }

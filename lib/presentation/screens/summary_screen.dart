@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../viewmodels/users_view_model.dart';
+import '../viewmodels/auth_view_model.dart';
 import '../widgets/futuristic_scaffold.dart';
 import '../../domain/repositories/local_storage_repository.dart' as domain;
 import '../../domain/entities/user.dart' as domain;
@@ -17,6 +18,27 @@ class SummaryScreen extends StatelessWidget {
     return FuturisticScaffold(
       title: 'Resumen',
       actions: [
+        IconButton(
+          tooltip: 'Cerrar sesión',
+          icon: const Icon(Icons.logout),
+          onPressed: () async {
+            final confirm = await showDialog<bool>(
+              context: context,
+              builder: (ctx) => AlertDialog(
+                backgroundColor: const Color(0xFF1B2233),
+                title: const Text('Cerrar sesión', style: TextStyle(color: Colors.white)),
+                content: const Text('¿Deseas cerrar sesión?'),
+                actions: [
+                  TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+                  FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Cerrar sesión')),
+                ],
+              ),
+            );
+            if (confirm == true) {
+              await context.read<AuthViewModel>().signOut();
+            }
+          },
+        ),
         IconButton(
           tooltip: 'Borrar base de datos',
           icon: const Icon(Icons.delete_forever_outlined),
