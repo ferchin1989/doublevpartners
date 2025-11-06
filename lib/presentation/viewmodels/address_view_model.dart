@@ -21,13 +21,7 @@ class AddressViewModel extends ChangeNotifier {
   Municipality? selectedMunicipality;
   String line1 = '';
 
-  Future<void> loadFromStorage() async {
-    final loaded = await storage.loadAddresses();
-    _addresses
-      ..clear()
-      ..addAll(loaded);
-    notifyListeners();
-  }
+  // Removed legacy loadFromStorage - use loadAddressesForUser(userId) instead
 
   Future<void> loadCountries() async {
     countries = await repo.getCountries();
@@ -73,18 +67,18 @@ class AddressViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void removeAt(int index) {
+  Future<void> removeAtForUser(int userId, int index) async {
     if (index>=0 && index<_addresses.length) {
       final a = _addresses.removeAt(index);
-      storage.deleteAddress(a);
+      await storage.deleteAddressForUser(userId, a);
       notifyListeners();
     }
   }
 
-  Future<void> updateLineAt(int index, String newLine) async {
+  Future<void> updateLineAtForUser(int userId, int index, String newLine) async {
     if (index>=0 && index<_addresses.length && newLine.trim().isNotEmpty) {
       final old = _addresses[index];
-      await storage.updateAddressLine(old, newLine.trim());
+      await storage.updateAddressLineForUser(userId, old, newLine.trim());
       _addresses[index] = Address(
         country: old.country,
         department: old.department,

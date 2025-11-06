@@ -7,31 +7,10 @@ import 'package:doublevpartners/domain/entities/address.dart';
 
 class FakeLocalStorageRepository implements domain.LocalStorageRepository {
   final List<Address> _addresses = [];
-  @override
-  Future<List<Address>> loadAddresses() async => List.unmodifiable(_addresses);
-  @override
-  Future<void> addAddress(Address a) async { _addresses.add(a); }
-  @override
-  Future<void> deleteAddress(Address a) async { _addresses.removeWhere((x) => x.line1==a.line1 && x.municipality.code==a.municipality.code); }
-  // User methods not used here but must exist
-  @override
-  Future<User?> loadUser() async => null;
-  @override
-  Future<void> saveUser(User u) async {}
-  @override
-  Future<void> updateAddressLine(Address oldAddress, String newLine1) async {
-    final idx = _addresses.indexWhere((x) => x.line1==oldAddress.line1 && x.municipality.code==oldAddress.municipality.code);
-    if (idx != -1) {
-      _addresses[idx] = Address(
-        country: oldAddress.country,
-        department: oldAddress.department,
-        municipality: oldAddress.municipality,
-        line1: newLine1,
-      );
-    }
-  }
+  
   @override
   Future<void> clearAll() async { _addresses.clear(); }
+  
   @override
   Future<List<User>> listUsers() async => [];
   @override
@@ -40,12 +19,15 @@ class FakeLocalStorageRepository implements domain.LocalStorageRepository {
   Future<void> updateUser(User u) async {}
   @override
   Future<void> deleteUser(int id) async {}
+  
   @override
   Future<List<Address>> loadAddressesByUser(int userId) async => List.unmodifiable(_addresses);
   @override
   Future<void> addAddressForUser(int userId, Address a) async { _addresses.add(a); }
   @override
-  Future<void> deleteAddressForUser(int userId, Address a) async { _addresses.removeWhere((x) => x.line1==a.line1 && x.municipality.code==a.municipality.code); }
+  Future<void> deleteAddressForUser(int userId, Address a) async { 
+    _addresses.removeWhere((x) => x.line1==a.line1 && x.municipality.code==a.municipality.code); 
+  }
   @override
   Future<void> updateAddressLineForUser(int userId, Address oldAddress, String newLine1) async {
     final idx = _addresses.indexWhere((x) => x.line1==oldAddress.line1 && x.municipality.code==oldAddress.municipality.code);
@@ -87,7 +69,7 @@ void main() {
       expect(vm.addresses.length, 1);
 
       // Remove address
-      vm.removeAt(0);
+      await vm.removeAtForUser(1, 0);
       expect(vm.addresses, isEmpty);
     });
   });

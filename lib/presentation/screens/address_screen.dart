@@ -132,7 +132,7 @@ class _AddressScreenState extends State<AddressScreen> {
                     subtitle: Text('${a.country.name} • ${a.department.name} • ${a.municipality.name}'),
                     trailing: IconButton(
                       icon: const Icon(Icons.delete_outline),
-                      onPressed: () => vm.removeAt(index),
+                      onPressed: () => vm.removeAtForUser(activeUser.id!, index),
                     ),
                   ),
                 );

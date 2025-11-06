@@ -2,20 +2,16 @@ import '../../domain/entities/user.dart';
 import '../../domain/entities/address.dart';
 
 abstract class LocalStorageRepository {
-  Future<User?> loadUser();
-  Future<void> saveUser(User u);
-
-  Future<List<Address>> loadAddresses();
-  Future<void> addAddress(Address a);
-  Future<void> deleteAddress(Address a);
-  Future<void> updateAddressLine(Address oldAddress, String newLine1);
+  // Database management
   Future<void> clearAll();
 
-  // Multiuser
+  // User operations
   Future<List<User>> listUsers();
   Future<User> createUser(User u);
   Future<void> updateUser(User u);
   Future<void> deleteUser(int id);
+
+  // Address operations (by user)
   Future<List<Address>> loadAddressesByUser(int userId);
   Future<void> addAddressForUser(int userId, Address a);
   Future<void> deleteAddressForUser(int userId, Address a);
