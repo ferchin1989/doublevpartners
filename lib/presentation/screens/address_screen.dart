@@ -16,8 +16,20 @@ class _AddressScreenState extends State<AddressScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final vm = context.watch<AddressViewModel>();
-    final activeUser = context.watch<UsersViewModel>().activeUser;
+    final vm = context.watch<AddressViewModel?>();
+    final usersVM = context.watch<UsersViewModel?>();
+    
+    // Si los ViewModels no están listos, mostrar loading
+    if (vm == null || usersVM == null) {
+      return FuturisticScaffold(
+        title: 'Direcciones',
+        body: const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+    
+    final activeUser = usersVM.activeUser;
     
     // Auto-load addresses when active user changes
     if (activeUser?.id != _lastActiveUserId && activeUser?.id != null) {

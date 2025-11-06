@@ -12,8 +12,18 @@ class SummaryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final usersVM = context.watch<UsersViewModel>();
-    final storage = context.read<domain.LocalStorageRepository>();
+    final usersVM = context.watch<UsersViewModel?>();
+    final storage = context.read<domain.LocalStorageRepository?>();
+
+    // Si los ViewModels no están listos, mostrar loading
+    if (usersVM == null || storage == null) {
+      return FuturisticScaffold(
+        title: 'Resumen',
+        body: const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
 
     return FuturisticScaffold(
       title: 'Resumen',
@@ -93,7 +103,7 @@ class _UserCardState extends State<_UserCard> {
   List<domain.Address>? _addresses;
 
   Future<void> _loadAddresses() async {
-    if (_addresses == null && widget.user.id != null) {
+    if (widget.user.id != null) {
       final addrs = await widget.storage.loadAddressesByUser(widget.user.id!);
       if (mounted) {
         setState(() => _addresses = addrs);

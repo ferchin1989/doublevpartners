@@ -20,6 +20,18 @@ class _UserScreenState extends State<UserScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final usersVM = context.watch<UsersViewModel?>();
+    
+    // Si el ViewModel no está listo (usuario no autenticado), mostrar loading
+    if (usersVM == null) {
+      return FuturisticScaffold(
+        title: 'Usuario',
+        body: const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+    
     return FuturisticScaffold(
       title: 'Usuario',
       body: Form(
@@ -81,9 +93,18 @@ class _UserScreenState extends State<UserScreen> {
                     FilledButton.icon(
                       onPressed: _canCreate ? () async {
                         if (_formKey.currentState!.validate()) {
-                          await context.read<UsersViewModel>().createUser(_firstName.trim(), _lastName.trim(), _birthDate);
+                          await usersVM.createUser(_firstName.trim(), _lastName.trim(), _birthDate);
                           if (mounted) {
-                            DefaultTabController.of(context).animateTo(1); // Navigate to Addresses tab
+                            // Limpiar formulario
+                            setState(() {
+                              _firstName = '';
+                              _lastName = '';
+                              _birthDate = null;
+                            });
+                            _formKey.currentState!.reset();
+                            
+                            // Navegar a la pestaña de direcciones
+                            DefaultTabController.of(context).animateTo(1);
                           }
                         }
                       } : null,

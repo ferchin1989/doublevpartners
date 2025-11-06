@@ -36,7 +36,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
             _emailController.text.trim(),
             _passwordController.text,
           );
-      // La navegación se maneja automáticamente por el AuthWrapper
+      
+      // Registro exitoso - cerrar la pantalla de registro
+      if (mounted) {
+        Navigator.of(context).pop();
+        // El AuthWrapper detectará el cambio y mostrará la app
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -45,9 +50,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
             backgroundColor: Colors.red,
           ),
         );
+        setState(() => _isLoading = false);
       }
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
     }
   }
 
